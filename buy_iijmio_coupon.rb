@@ -17,27 +17,28 @@ class BuyIIJmioCoupon
     @logger = logger || Logger.new(STDERR)
     Capybara.app_host = 'https://www.iijmio.jp/service/setup/hdd/charge/'
     Capybara.default_max_wait_time = 5
-    case driver
-    when CHROME
-      Capybara.current_driver = :selenium
-      Capybara.javascript_driver = :selenium
-      Capybara.register_driver :selenium do |app|
-        Capybara::Selenium::Driver.new(app, :browser => :chrome)
-      end
+    Capybara.current_driver = :selenium
+    Capybara.javascript_driver = :selenium
 
-    when HEADLESS_CHROME
-      Capybara.current_driver = :selenium
-      Capybara.javascript_driver = :selenium
-      Capybara.register_driver :selenium do |app|
-        capabilities = Selenium::WebDriver::Remote::Capabilities.chrome(
+    capabilities =
+      case driver
+      when CHROME
+        Selenium::WebDriver::Remote::Capabilities.chrome(
+          chromeOptions: { args: %w() }
+        )
+
+      when HEADLESS_CHROME
+        Selenium::WebDriver::Remote::Capabilities.chrome(
           chromeOptions: { args: %w(headless disable-gpu) }
         )
-        Capybara::Selenium::Driver.new(
-          app,
-          browser: :chrome,
-          desired_capabilities: capabilities
-        )
       end
+
+    Capybara.register_driver :selenium do |app|
+      Capybara::Selenium::Driver.new(
+        app,
+        browser: :chrome,
+        desired_capabilities: capabilities
+      )
     end
   end
 
