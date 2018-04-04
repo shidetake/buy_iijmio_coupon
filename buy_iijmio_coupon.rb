@@ -4,7 +4,6 @@ require 'logger'
 require 'optparse'
 require 'capybara'
 require 'capybara/dsl'
-require 'capybara/poltergeist'
 require 'selenium-webdriver'
 require 'socket'
 
@@ -12,7 +11,7 @@ class BuyIIJmioCoupon
   include Capybara::DSL
 
   CHROME = 0
-  POLTERGEIST = 1
+  HEADLESS_CHROME = 1
 
   def initialize(driver, logger = nil)
     @logger = logger || Logger.new(STDERR)
@@ -26,13 +25,19 @@ class BuyIIJmioCoupon
         Capybara::Selenium::Driver.new(app, :browser => :chrome)
       end
 
-    when POLTERGEIST
-      Capybara.current_driver = :poltergeist
-      Capybara.javascript_driver = :poltergeist
-      Capybara.register_driver :poltergeist do |app|
-        Capybara::Poltergeist::Driver.new(app, {:timeout => 120, js_errors: false})
+    when HEADLESS_CHROME
+      Capybara.current_driver = :selenium
+      Capybara.javascript_driver = :selenium
+      Capybara.register_driver :selenium do |app|
+        capabilities = Selenium::WebDriver::Remote::Capabilities.chrome(
+          chromeOptions: { args: %w(headless disable-gpu) }
+        )
+        Capybara::Selenium::Driver.new(
+          app,
+          browser: :chrome,
+          desired_capabilities: capabilities
+        )
       end
-      page.driver.headers = {'User-Agent' => 'Mac Safari'}
     end
   end
 
@@ -81,7 +86,7 @@ addr = gs.addr
 addr.shift
 printf("server is on %s\n", addr.join(":"))
 
-crawler = BuyIIJmioCoupon.new(BuyIIJmioCoupon::POLTERGEIST)
+crawler = BuyIIJmioCoupon.new(BuyIIJmioCoupon::HEADLESS_CHROME)
 loop do
   s = gs.accept
   print(s, " is accepted\n")
