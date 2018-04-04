@@ -11,7 +11,7 @@ require 'socket'
 class BuyIIJmioCoupon
   include Capybara::DSL
 
-  SELENIUM = 0
+  CHROME = 0
   POLTERGEIST = 1
 
   def initialize(driver, logger = nil)
@@ -19,7 +19,7 @@ class BuyIIJmioCoupon
     Capybara.app_host = 'https://www.iijmio.jp/service/setup/hdd/charge/'
     Capybara.default_max_wait_time = 5
     case driver
-    when SELENIUM
+    when CHROME
       Capybara.current_driver = :selenium
       Capybara.javascript_driver = :selenium
       Capybara.register_driver :selenium do |app|
@@ -66,7 +66,7 @@ params = ARGV.getopts('', 'debug')
 if params['debug']
   begin
     logger = Logger.new('log')
-    crawler = BuyIIJmioCoupon.new(BuyIIJmioCoupon::SELENIUM, logger)
+    crawler = BuyIIJmioCoupon.new(BuyIIJmioCoupon::CHROME, logger)
     crawler.login
     crawler.buy
     exit
