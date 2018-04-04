@@ -7,6 +7,7 @@ require 'capybara/dsl'
 require 'selenium-webdriver'
 require 'socket'
 
+# buy IIJmio coupon
 class BuyIIJmioCoupon
   include Capybara::DSL
 
@@ -47,10 +48,8 @@ class BuyIIJmioCoupon
   def login
     visit('')
     login_info = YAML.load_file('./config.yml')['login_info']
-    fill_in 'j_username',
-      :with => login_info['username']
-    fill_in 'j_password',
-      :with => login_info['password']
+    fill_in 'j_username', with: login_info['username']
+    fill_in 'j_password', with: login_info['password']
     click_button 'ログイン'
   end
 
@@ -82,10 +81,10 @@ if params['debug']
   end
 end
 
-gs = TCPServer.open(23456)
+gs = TCPServer.open(23_456)
 addr = gs.addr
 addr.shift
-printf("server is on %s\n", addr.join(":"))
+printf("server is on %s\n", addr.join(':'))
 
 crawler = BuyIIJmioCoupon.new(BuyIIJmioCoupon::HEADLESS_CHROME)
 loop do
